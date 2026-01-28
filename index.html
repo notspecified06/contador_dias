@@ -1,33 +1,244 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Contador Dinâmico – SPGI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contador Dinâmico – SPGI</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 80px;
-      background-color: #f7f7f7;
-      overflow-x: hidden;
-    }
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f7f7f7;
+  text-align:center;
+  overflow-x:hidden;
+}
 
-    h1 {
-      font-size: 2.2em;
-      margin-bottom: 20px;
-    }
+h1{margin-top:60px}
+.subtitulo{color:#555;margin-bottom:30px}
 
-    .subtitulo {
-      font-size: 1.2em;
-      margin-bottom: 40px;
-      color: #555;
-    }
+.contador{
+  font-size:2.6em;
+  background:#fff;
+  display:inline-block;
+  padding:25px 40px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,.15);
+  position:relative;
+  z-index:10;
+}
 
-    .contador {
-      font-size: 2.6em;
-      font-weight: bold;
-      background: #fff;
-      display: inline-block;
-      padding: 25px 40px;
+.contador span{min-width:90px;display:inline-block}
+.label{font-size:.4em;color:#666;display:block}
+
+/* ================= FESTA ================= */
+
+.hidden{display:none}
+#celebracao{position:fixed;inset:0;pointer-events:none;z-index:999}
+
+/* CONFETES */
+.confete{
+  position:fixed;
+  top:-30px;
+  font-size:1.5rem;
+  animation:cair linear forwards;
+}
+@keyframes cair{
+  to{transform:translateY(120vh) rotate(1080deg);opacity:0}
+}
+
+/* FOGO DE ARTIFÍCIO */
+.fogo{
+  position:fixed;
+  top:10%;
+  font-size:2.2rem;
+  animation:explodir 1.8s ease-out forwards;
+}
+@keyframes explodir{
+  0%{transform:scale(.2);opacity:1}
+  80%{opacity:1}
+  100%{transform:scale(2.6);opacity:0}
+}
+
+/* ================= BOLO GIGANTE ================= */
+
+.bolo-container{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:55vh;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  z-index:998;
+}
+
+.bolo{
+  width:72%;
+  max-width:720px;
+  height:92%;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      #fff 0px,
+      #fff 22px,
+      #f0f0f0 24px
+    );
+  border-radius:25px;
+  position:relative;
+  box-shadow:0 -8px 25px rgba(0,0,0,.25);
+}
+
+/* Chocolate a escorrer */
+.bolo::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:65px;
+  background:#6b3e2e;
+  border-radius:25px 25px 15px 15px;
+  clip-path:polygon(0 0,100% 0,100% 70%,90% 60%,80% 75%,70% 55%,60% 70%,50% 55%,40% 70%,30% 55%,20% 75%,10% 60%,0 70%);
+}
+
+/* Base rosa */
+.bolo::after{
+  content:"";
+  position:absolute;
+  bottom:-35px;
+  left:0;
+  width:100%;
+  height:60px;
+  background:
+    repeating-radial-gradient(circle at 30px 30px,#f6b6cc 0 18px,#f6b6cc 18px,#f3a4bf 20px);
+  border-radius:0 0 30px 30px;
+}
+
+/* Nome */
+.nome{
+  position:absolute;
+  top:45%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:3.4rem;
+  font-weight:bold;
+  background:#ffd6e5;
+  padding:14px 34px;
+  border-radius:14px;
+  box-shadow:0 4px 10px rgba(0,0,0,.25);
+}
+
+/* Vela */
+.vela{
+  position:absolute;
+  top:-75px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:3.2rem;
+  animation:chama .7s infinite alternate;
+}
+@keyframes chama{
+  from{transform:translateX(-50%) scale(1)}
+  to{transform:translateX(-50%) scale(1.2)}
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Quantos dias se passaram desde que o concurso do SPGI teve a última atualização?</h1>
+<div class="subtitulo">Última atualização registada em 28/01/2025</div>
+
+<div class="contador">
+  <span id="dias">0<span class="label">dias</span></span>
+  <span id="horas">00<span class="label">horas</span></span>
+  <span id="minutos">00<span class="label">min</span></span>
+  <span id="segundos">00<span class="label">seg</span></span>
+</div>
+
+<div id="celebracao" class="hidden">
+  <div class="bolo-container">
+    <div class="bolo">
+      <div class="vela">🕯️</div>
+      <div class="nome">SPGI</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const dataInicial=new Date(2025,0,28);
+let festa=false;
+
+/* CONFETES */
+function confete(){
+  const c=document.createElement("div");
+  c.className="confete";
+  c.textContent=["🎉","🎊","✨","⭐","💥","🌟"][Math.floor(Math.random()*6)];
+  c.style.left=Math.random()*100+"vw";
+  c.style.animationDuration=(3+Math.random()*3)+"s";
+  document.body.appendChild(c);
+  setTimeout(()=>c.remove(),7000);
+}
+
+/* FOGO NORMAL */
+function fogo(){
+  const f=document.createElement("div");
+  f.className="fogo";
+  f.textContent="🎆";
+  f.style.left=Math.random()*100+"vw";
+  f.style.top=(5+Math.random()*40)+"vh";
+  document.body.appendChild(f);
+  setTimeout(()=>f.remove(),2000);
+}
+
+/* GRANDE FINAL */
+function grandeFinal(){
+  const inicio=Date.now();
+  const intervalo=setInterval(()=>{
+    for(let i=0;i<8;i++)fogo();
+    if(Date.now()-inicio>3000)clearInterval(intervalo);
+  },250);
+}
+
+/* INICIAR FESTA */
+function iniciarFesta(){
+  document.getElementById("celebracao").classList.remove("hidden");
+
+  grandeFinal(); // 🔥 FINAL DE FESTIVAL 🔥
+
+  setInterval(()=>{for(let i=0;i<14;i++)confete()},450);
+  setInterval(()=>fogo(),900);
+}
+
+/* CONTADOR */
+function atualizar(){
+  let diff=Math.floor((new Date()-dataInicial)/1000);
+  if(diff<0)diff=0;
+
+  const d=Math.floor(diff/86400);
+  diff%=86400;
+  const h=Math.floor(diff/3600);
+  diff%=3600;
+  const m=Math.floor(diff/60);
+  const s=diff%60;
+
+  dias.firstChild.nodeValue=d;
+  horas.firstChild.nodeValue=h.toString().padStart(2,"0");
+  minutos.firstChild.nodeValue=m.toString().padStart(2,"0");
+  segundos.firstChild.nodeValue=s.toString().padStart(2,"0");
+
+  if(d>=365 && !festa){
+    festa=true;
+    iniciarFesta();
+  }
+}
+
+atualizar();
+setInterval(atualizar,1000);
+</script>
+
+</body>
+</html>
