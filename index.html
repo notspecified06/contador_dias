@@ -11,6 +11,7 @@
       text-align: center;
       margin-top: 80px;
       background-color: #f7f7f7;
+      overflow-x: hidden;
     }
 
     h1 {
@@ -32,6 +33,8 @@
       padding: 25px 40px;
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      z-index: 10;
+      position: relative;
     }
 
     .contador span {
@@ -46,8 +49,78 @@
       color: #666;
       font-weight: normal;
     }
+
+    /* ================= CELEBRAÇÃO ================= */
+
+    .hidden {
+      display: none;
+    }
+
+    #celebracao {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* Balões */
+    .balao {
+      position: absolute;
+      bottom: -120px;
+      font-size: 3rem;
+      animation: subir 9s linear infinite;
+      opacity: 0;
+    }
+
+    .balao1 { left: 15%; animation-delay: 0s; }
+    .balao2 { left: 45%; animation-delay: 2s; }
+    .balao3 { left: 75%; animation-delay: 4s; }
+
+    @keyframes subir {
+      0% { transform: translateY(0); opacity: 0; }
+      10% { opacity: 1; }
+      100% { transform: translateY(-120vh); opacity: 0; }
+    }
+
+    /* Confetis */
+    .confete {
+      position: fixed;
+      top: -20px;
+      font-size: 1.2rem;
+      animation: cair linear forwards;
+      z-index: 998;
+    }
+
+    @keyframes cair {
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* Bolo */
+    .bolo {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 5rem;
+      text-align: center;
+      z-index: 999;
+    }
+
+    .vela {
+      font-size: 1.5rem;
+      animation: piscar 1s infinite alternate;
+    }
+
+    @keyframes piscar {
+      from { opacity: 1; }
+      to { opacity: 0.4; }
+    }
   </style>
 </head>
+
 <body>
 
   <h1>Quantos dias se passaram desde que o concurso do SPGI teve a última atualização?</h1>
@@ -55,19 +128,51 @@
 
   <div class="contador">
     <span id="dias">0<span class="label">dias</span></span>
-    <span id="horas">0<span class="label">horas</span></span>
-    <span id="minutos">0<span class="label">min</span></span>
-    <span id="segundos">0<span class="label">seg</span></span>
+    <span id="horas">00<span class="label">horas</span></span>
+    <span id="minutos">00<span class="label">min</span></span>
+    <span id="segundos">00<span class="label">seg</span></span>
+  </div>
+
+  <!-- CELEBRAÇÃO -->
+  <div id="celebracao" class="hidden">
+    <div class="balao balao1">🎈</div>
+    <div class="balao balao2">🎈</div>
+    <div class="balao balao3">🎈</div>
+
+    <div class="bolo">
+      🎂
+      <div class="vela">🕯️</div>
+    </div>
   </div>
 
   <script>
-    // Data inicial: 28 de janeiro de 2025, 00:00:00
     const dataInicial = new Date(2025, 0, 28, 0, 0, 0);
+    let celebracaoAtiva = false;
+
+    function criarConfete() {
+      const confete = document.createElement("div");
+      confete.className = "confete";
+      confete.textContent = ["🎊","🎉","✨","💥"][Math.floor(Math.random() * 4)];
+      confete.style.left = Math.random() * 100 + "vw";
+      confete.style.animationDuration = (3 + Math.random() * 3) + "s";
+      document.body.appendChild(confete);
+
+      setTimeout(() => confete.remove(), 6000);
+    }
+
+    function iniciarCelebracao() {
+      document.getElementById("celebracao").classList.remove("hidden");
+
+      setInterval(() => {
+        for (let i = 0; i < 6; i++) {
+          criarConfete();
+        }
+      }, 600);
+    }
 
     function atualizarContador() {
       const agora = new Date();
-      let diferenca = Math.floor((agora - dataInicial) / 1000); // segundos totais
-
+      let diferenca = Math.floor((agora - dataInicial) / 1000);
       if (diferenca < 0) diferenca = 0;
 
       const dias = Math.floor(diferenca / (24 * 3600));
@@ -83,6 +188,11 @@
       document.getElementById("horas").firstChild.nodeValue = horas.toString().padStart(2, "0");
       document.getElementById("minutos").firstChild.nodeValue = minutos.toString().padStart(2, "0");
       document.getElementById("segundos").firstChild.nodeValue = segundos.toString().padStart(2, "0");
+
+      if (dias >= 365 && !celebracaoAtiva) {
+        celebracaoAtiva = true;
+        iniciarCelebracao();
+      }
     }
 
     atualizarContador();
@@ -90,6 +200,4 @@
   </script>
 
 </body>
-
 </html>
-
